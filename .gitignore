@@ -1,0 +1,17 @@
+# Material fuente (originales sin optimizar, no se publica)
+uploads/
+
+# Entorno
+.env
+.env.local
+.vercel
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.swp
