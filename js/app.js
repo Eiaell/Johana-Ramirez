@@ -65,13 +65,36 @@
 
   // ===== Identity — auto-cycle words (not scroll-driven) =====
   const identitySection = document.querySelector('.identity');
+  const identitySticky  = document.querySelector('.identity__sticky');
   const identityWords   = document.querySelectorAll('.identity__word');
   const identityBottom  = document.querySelector('.identity__bottomline');
   const identityCount   = document.querySelector('.identity__count');
 
   let identityIdx = 0;
   let identityTimer = null;
-  const IDENTITY_INTERVAL = 1800; // ms per word
+  const IDENTITY_INTERVAL = 2800; // ms per word (typewriter needs hold time)
+
+  // Split each word into per-letter spans for staggered reveal
+  function splitWordIntoChars(wordEl) {
+    const counter = { i: 0 };
+    function process(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const frag = document.createDocumentFragment();
+        for (const ch of node.textContent) {
+          const span = document.createElement('span');
+          span.className = 'char';
+          span.style.setProperty('--i', counter.i++);
+          span.textContent = ch === ' ' ? ' ' : ch;
+          frag.appendChild(span);
+        }
+        node.parentNode.replaceChild(frag, node);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        Array.from(node.childNodes).forEach(process);
+      }
+    }
+    process(wordEl);
+  }
+  identityWords.forEach(splitWordIntoChars);
 
   function setIdentity(idx) {
     const n = identityWords.length;
@@ -95,7 +118,14 @@
 
   // Start cycling only when the section is visible (saves cycles + avoids ticking offscreen)
   if (identitySection && identityWords.length) {
-    setIdentity(0);
+    // Wait two animation frames so the browser paints the initial char state
+    // (opacity 0) before we flip the active class — that way the transition fires.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (identitySticky) identitySticky.classList.add('is-ready');
+        setIdentity(0);
+      });
+    });
     const visIO = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
