@@ -42,7 +42,7 @@
   document.head.appendChild(styleEl);
 
   window.addEventListener('load', () => {
-    const minDelay = 2100;
+    const minDelay = 3200;
     setTimeout(() => {
       loader && loader.classList.add('hidden');
       hero && hero.classList.add('is-ready');
