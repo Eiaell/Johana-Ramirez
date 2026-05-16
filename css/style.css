@@ -365,6 +365,62 @@ p.body {
 .hero.is-ready .hero__scroll { opacity: 1; }
 
 /* ============================================
+   TRUST STRIP — client logos marquee
+   ============================================ */
+.trust {
+  position: absolute;
+  top: 78px;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
+  opacity: 0;
+  transition: opacity 1.2s var(--ease-out) 1.4s;
+}
+.hero.is-ready .trust { opacity: 1; }
+
+.trust__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: trust-marquee 60s linear infinite;
+  will-change: transform;
+}
+.trust:hover .trust__track { animation-play-state: paused; }
+
+.trust__logo {
+  flex: 0 0 auto;
+  height: 38px;
+  width: auto;
+  margin-right: clamp(48px, 6vw, 88px);
+  filter: grayscale(1) opacity(0.5);
+  transition: filter 0.5s var(--ease-out);
+  pointer-events: auto;
+}
+.trust__logo:hover { filter: grayscale(1) opacity(0.85); }
+
+.trust__logo--xl { height: 56px; }
+
+@keyframes trust-marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+@media (max-width: 720px) {
+  .trust { top: 64px; }
+  .trust__track { animation-duration: 44s; }
+  .trust__logo { height: 26px; margin-right: 40px; }
+  .trust__logo--xl { height: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trust__track { animation: none; }
+}
+
+/* ============================================
    IDENTITY SECTION — pinned word reveal
    ============================================ */
 .identity {
