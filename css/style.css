@@ -411,7 +411,7 @@ p.body {
 
 @media (max-width: 720px) {
   .trust { top: 64px; }
-  .trust__track { animation-duration: 44s; }
+  .trust__track { animation-duration: 24s; }
   .trust__logo { height: 26px; margin-right: 40px; }
   .trust__logo--xl { height: 40px; }
 }
