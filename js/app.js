@@ -5,6 +5,14 @@
 (function () {
   'use strict';
 
+  // ===== Force scroll to top on reload (a menos que el URL tenga #hash) =====
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+  if (!window.location.hash) {
+    window.scrollTo(0, 0);
+  }
+
   // ===== Loader =====
   const loader = document.querySelector('.loader');
   const hero   = document.querySelector('.hero');
