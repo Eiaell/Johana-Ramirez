@@ -64,11 +64,12 @@
   }, { passive: true });
 
   // ===== Identity — auto-cycle words (not scroll-driven) =====
-  const identitySection = document.querySelector('.identity');
-  const identitySticky  = document.querySelector('.identity__sticky');
-  const identityWords   = document.querySelectorAll('.identity__word');
-  const identityBottom  = document.querySelector('.identity__bottomline');
-  const identityCount   = document.querySelector('.identity__count');
+  const identitySection  = document.querySelector('.identity');
+  const identitySticky   = document.querySelector('.identity__sticky');
+  const identityWords    = document.querySelectorAll('.identity__word');
+  const identityMemories = document.querySelectorAll('.identity__memory');
+  const identityBottom   = document.querySelector('.identity__bottomline');
+  const identityCount    = document.querySelector('.identity__count');
 
   let identityIdx = 0;
   let identityTimer = null;
@@ -101,6 +102,9 @@
     identityWords.forEach((w, i) => {
       w.classList.toggle('is-active', i === idx);
       w.classList.toggle('is-past',   i <  idx);
+    });
+    identityMemories.forEach((m, i) => {
+      m.classList.toggle('is-active', i === idx);
     });
     if (identityCount) {
       identityCount.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0');

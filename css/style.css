@@ -446,6 +446,33 @@ p.body {
     radial-gradient(50% 50% at 30% 40%, rgba(214, 173, 100, 0.10), transparent 70%),
     radial-gradient(50% 50% at 80% 80%, rgba(243, 223, 223, 0.55), transparent 70%);
 }
+
+/* Memorias — imagen por palabra, en tono evocador */
+.identity__memories {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  z-index: 1;
+}
+.identity__memory {
+  position: absolute;
+  width: min(78vw, 520px);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 4px;
+  filter: grayscale(1) sepia(0.14) brightness(1.05) contrast(0.95);
+  opacity: 0;
+  transform: translateX(min(20vw, 220px));
+  transition: opacity 0.9s var(--ease-out);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 55%, transparent 95%);
+          mask-image: radial-gradient(ellipse at center, black 55%, transparent 95%);
+}
+.identity__memory.is-active { opacity: 0.5; }
+
+/* El texto va por encima de la memoria */
+.identity__stack { z-index: 2; }
 .identity__stack {
   position: relative;
   display: flex;
@@ -459,6 +486,7 @@ p.body {
   color: var(--navy);
   font-weight: 400;
   letter-spacing: -0.02em;
+  transform: translateX(max(-120px, -10vw));
 }
 .identity__soy {
   white-space: nowrap;
