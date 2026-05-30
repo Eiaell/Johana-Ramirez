@@ -44,6 +44,43 @@
     }
   })();
 
+  // ===== Línea de marcas — efecto lupa: crece en el centro, decrece hacia los lados =====
+  (function () {
+    const strip = document.querySelector('.herostrip');
+    if (!strip || prefersReduced) return;            // reduce-motion: escala uniforme (CSS)
+    const logos = Array.from(strip.querySelectorAll('.herostrip__logo'));
+    if (!logos.length) return;
+
+    const MAX = 1.5;    // escala en el centro de la pantalla
+    const MIN = 0.68;   // escala en los extremos
+    const SIGMA = 0.24; // ancho del "lente" como fracción del viewport
+
+    let raf = null;
+    function frame() {
+      const cx = window.innerWidth / 2;
+      const sigma = window.innerWidth * SIGMA;
+      // batch: leer todas las posiciones y luego escribir (evita thrash de layout)
+      const out = logos.map(function (el) {
+        const r = el.getBoundingClientRect();
+        const d = (r.left + r.width / 2 - cx) / sigma;
+        const g = Math.exp(-d * d);                  // 1 en el centro → 0 en los extremos
+        return { s: MIN + (MAX - MIN) * g, o: 0.5 + 0.5 * g };
+      });
+      for (let i = 0; i < logos.length; i++) {
+        logos[i].style.transform = 'scale(' + out[i].s.toFixed(3) + ')';
+        logos[i].style.opacity = out[i].o.toFixed(3);
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    const io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { if (!raf) raf = requestAnimationFrame(frame); }
+        else if (raf) { cancelAnimationFrame(raf); raf = null; }
+      });
+    }, { threshold: 0 });
+    io.observe(strip);
+  })();
+
   // ===== Nav scrolled state =====
   const nav = document.querySelector('.nav');
   const fab = document.querySelector('.whatsapp-fab');

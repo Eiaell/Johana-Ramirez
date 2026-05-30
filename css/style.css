@@ -306,6 +306,12 @@ p.body {
   /* blanco + sombra suave: legible sobre el video, sin barra clara */
   filter: brightness(0) invert(1) drop-shadow(0 1px 5px rgba(0, 0, 0, 0.55));
   opacity: 0.72;
+  transform-origin: center center;   /* el efecto lupa (JS) escala desde el centro */
+  will-change: transform, opacity;
+}
+/* MINI: alas/disco ya vienen en blanco con "MINI" oscuro → NO blanquear, solo sombra */
+.herostrip__logo--mini {
+  filter: drop-shadow(0 1px 5px rgba(0, 0, 0, 0.55));
 }
 @media (max-width: 720px) {
   .herostrip { top: 60px; }
