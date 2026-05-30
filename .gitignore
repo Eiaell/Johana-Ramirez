@@ -1,5 +1,9 @@
 # Material fuente (originales sin optimizar, no se publica)
 uploads/
+assets/videos/
+
+# Logs locales
+.claude-localhost.log
 
 # Entorno
 .env

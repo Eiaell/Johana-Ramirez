@@ -49,27 +49,60 @@
   `;
   document.head.appendChild(styleEl);
 
-  window.addEventListener('load', () => {
-    const minDelay = 3200;
-    setTimeout(() => {
-      loader && loader.classList.add('hidden');
-      hero && hero.classList.add('is-ready');
-    }, minDelay);
-  });
+  // Splash completo solo en la primera visita de la sesion; en recargas y en
+  // reduce-motion no se castiga al usuario con una espera artificial.
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const alreadyLoaded = (function () {
+    try { return sessionStorage.getItem('jr_loaded') === '1'; } catch (e) { return false; }
+  })();
+
+  function revealHero() { hero && hero.classList.add('is-ready'); }
+  function hideLoader() { loader && loader.classList.add('hidden'); }
+
+  if (alreadyLoaded || prefersReduced) {
+    hideLoader();
+    revealHero();
+  } else {
+    const minDelay = 1500;
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        hideLoader();
+        revealHero();
+        try { sessionStorage.setItem('jr_loaded', '1'); } catch (e) {}
+      }, minDelay);
+    });
+    // Failsafe: si 'load' nunca dispara, no dejar al visitante atrapado en el loader.
+    setTimeout(() => { hideLoader(); revealHero(); }, 4500);
+  }
+
+  // ===== Hero video — reproducir solo cuando conviene =====
+  (function () {
+    const heroVideo = document.querySelector('.hero__video');
+    if (!heroVideo) return;
+    const saveData = navigator.connection && navigator.connection.saveData;
+    const tooSmall = window.matchMedia('(max-width: 700px)').matches;
+    if (prefersReduced || saveData || tooSmall) {
+      // Mostrar solo el poster: no descargar ni reproducir el loop pesado.
+      heroVideo.removeAttribute('autoplay');
+      heroVideo.preload = 'none';
+      try { heroVideo.pause(); } catch (e) {}
+    } else {
+      const tryPlay = () => heroVideo.play().catch(function () {});
+      tryPlay();
+      heroVideo.addEventListener('canplay', tryPlay, { once: true });
+    }
+  })();
 
   // ===== Nav scrolled state =====
   const nav = document.querySelector('.nav');
   const fab = document.querySelector('.whatsapp-fab');
   window.addEventListener('scroll', () => {
     const y = window.scrollY;
-    if (y > 80) {
-      nav && nav.classList.add('scrolled');
-      fab && fab.classList.add('show');
-    } else {
-      nav && nav.classList.remove('scrolled');
-      fab && fab.classList.remove('show');
-    }
+    if (y > 80) nav && nav.classList.add('scrolled');
+    else nav && nav.classList.remove('scrolled');
   }, { passive: true });
+  // WhatsApp disponible desde el arranque (con un respiro tras la entrada del hero).
+  setTimeout(function () { fab && fab.classList.add('show'); }, (alreadyLoaded || prefersReduced) ? 600 : 2200);
 
   // ===== Identity — auto-cycle words (not scroll-driven) =====
   const identitySection  = document.querySelector('.identity');
@@ -135,19 +168,22 @@
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (identitySticky) identitySticky.classList.add('is-ready');
-        setIdentity(0);
+        // Con reduce-motion no auto-ciclamos: mostramos un estado final estatico ("Soy Johana.").
+        setIdentity(prefersReduced ? identityWords.length - 1 : 0);
       });
     });
-    const visIO = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          if (!identityTimer) identityTimer = setInterval(tickIdentity, IDENTITY_INTERVAL);
-        } else {
-          if (identityTimer) { clearInterval(identityTimer); identityTimer = null; }
-        }
-      });
-    }, { threshold: 0.3 });
-    visIO.observe(identitySection);
+    if (!prefersReduced) {
+      const visIO = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            if (!identityTimer) identityTimer = setInterval(tickIdentity, IDENTITY_INTERVAL);
+          } else {
+            if (identityTimer) { clearInterval(identityTimer); identityTimer = null; }
+          }
+        });
+      }, { threshold: 0.3 });
+      visIO.observe(identitySection);
+    }
   }
 
   // ===== Reels (corporate + personal) =====
@@ -215,17 +251,26 @@
   }, { threshold: 0.12 });
   document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
 
-  // ===== Video play =====
-  const videoEl     = document.querySelector('.about__video video');
-  const videoOverlay= document.querySelector('.about__video__overlay');
-  const playBtn     = document.querySelector('.about__play');
-  if (playBtn && videoEl && videoOverlay) {
-    playBtn.addEventListener('click', () => {
-      videoEl.play();
-      videoEl.setAttribute('controls', '');
-      videoOverlay.classList.add('playing');
-    });
-  }
+  // ===== About video — retrato vivo (reproducir solo en viewport) =====
+  (function () {
+    const v = document.querySelector('.about__media');
+    if (!v) return;
+    const saveData = navigator.connection && navigator.connection.saveData;
+    const tooSmall = window.matchMedia('(max-width: 700px)').matches;
+    if (prefersReduced || saveData || tooSmall) {
+      v.removeAttribute('autoplay');
+      v.preload = 'none';
+      try { v.pause(); } catch (e) {}
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { v.play().catch(function () {}); }
+        else { v.pause(); }
+      });
+    }, { threshold: 0.25 });
+    io.observe(v);
+  })();
 
   // ===== Form (mailto fallback) =====
   const form = document.querySelector('#contact-form');
@@ -239,17 +284,28 @@
       const type    = data.get('type')    || '';
       const message = data.get('message') || '';
 
-      const subject = encodeURIComponent('Cotización de evento — ' + (name || 'Nuevo contacto'));
-      const body = encodeURIComponent(
-        `Hola Johana,\n\n` +
-        `Me gustaría conversar sobre un evento.\n\n` +
+      const text =
+        `Hola Johana 👋, me gustaría cotizar un evento.\n\n` +
         `Nombre: ${name}\n` +
-        `Email: ${email}\n` +
-        `Teléfono: ${phone}\n` +
-        `Tipo de evento: ${type}\n\n` +
-        `Mensaje:\n${message}\n`
-      );
-      window.location.href = `mailto:jrodriguez@creaktivo.com.pe?subject=${subject}&body=${body}`;
+        (email   ? `Email: ${email}\n`            : '') +
+        (phone   ? `Teléfono: ${phone}\n`         : '') +
+        (type    ? `Tipo de evento: ${type}\n`    : '') +
+        (message ? `\nMensaje:\n${message}\n`     : '');
+
+      const wa = 'https://wa.me/51956971495?text=' + encodeURIComponent(text);
+      window.open(wa, '_blank', 'noopener');
+
+      const btn = form.querySelector('.btn-primary');
+      if (btn) { btn.textContent = 'Abriendo WhatsApp…'; btn.disabled = true; }
+      let note = form.querySelector('.form-note');
+      if (!note) {
+        note = document.createElement('p');
+        note.className = 'form-note';
+        note.setAttribute('role', 'status');
+        note.setAttribute('aria-live', 'polite');
+        form.appendChild(note);
+      }
+      note.textContent = 'Te respondo personalmente en menos de 24 h. Si WhatsApp no se abrió, escríbeme al +51 956 971 495 o a jrodriguez@creaktivo.com.pe.';
     });
   }
 })();
