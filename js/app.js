@@ -13,66 +13,17 @@
     window.scrollTo(0, 0);
   }
 
-  // ===== Loader =====
-  const loader = document.querySelector('.loader');
-  const hero   = document.querySelector('.hero');
-
-  function spawnDust() {
-    const wrap = document.querySelector('.loader__wrap');
-    if (!wrap) return;
-    for (let i = 0; i < 18; i++) {
-      const d = document.createElement('span');
-      d.className = 'dust';
-      const size = 2 + Math.random() * 4;
-      d.style.width  = size + 'px';
-      d.style.height = size + 'px';
-      const angle = Math.random() * Math.PI * 2;
-      const dist  = 40 + Math.random() * 140;
-      d.style.left = '50%';
-      d.style.top  = '50%';
-      d.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-      d.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-      d.style.animation = `dust-out ${1.4 + Math.random() * 0.8}s ease-out ${0.6 + Math.random() * 0.6}s forwards`;
-      wrap.appendChild(d);
-    }
-  }
-  spawnDust();
-
-  // Dust keyframes injected
-  const styleEl = document.createElement('style');
-  styleEl.textContent = `
-    @keyframes dust-out {
-      0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
-      30%  { opacity: 0.9; }
-      100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1); opacity: 0; }
-    }
-  `;
-  document.head.appendChild(styleEl);
-
-  // Splash completo solo en la primera visita de la sesion; en recargas y en
-  // reduce-motion no se castiga al usuario con una espera artificial.
+  // ===== Entrada directa (sin loader) =====
+  const hero = document.querySelector('.hero');
   const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const alreadyLoaded = (function () {
-    try { return sessionStorage.getItem('jr_loaded') === '1'; } catch (e) { return false; }
-  })();
 
+  // Revelar el hero de inmediato. Dos frames para que su entrada (opacity/translate)
+  // se anime suavemente en lugar de aparecer de golpe.
   function revealHero() { hero && hero.classList.add('is-ready'); }
-  function hideLoader() { loader && loader.classList.add('hidden'); }
-
-  if (alreadyLoaded || prefersReduced) {
-    hideLoader();
+  if (prefersReduced) {
     revealHero();
   } else {
-    const minDelay = 1500;
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        hideLoader();
-        revealHero();
-        try { sessionStorage.setItem('jr_loaded', '1'); } catch (e) {}
-      }, minDelay);
-    });
-    // Failsafe: si 'load' nunca dispara, no dejar al visitante atrapado en el loader.
-    setTimeout(() => { hideLoader(); revealHero(); }, 4500);
+    requestAnimationFrame(() => requestAnimationFrame(revealHero));
   }
 
   // ===== Hero video — reproducir solo cuando conviene =====
@@ -102,84 +53,120 @@
     else nav && nav.classList.remove('scrolled');
   }, { passive: true });
   // WhatsApp disponible desde el arranque (con un respiro tras la entrada del hero).
-  setTimeout(function () { fab && fab.classList.add('show'); }, (alreadyLoaded || prefersReduced) ? 600 : 2200);
+  setTimeout(function () { fab && fab.classList.add('show'); }, prefersReduced ? 600 : 1400);
 
   // ===== Identity — auto-cycle words (not scroll-driven) =====
   const identitySection  = document.querySelector('.identity');
   const identitySticky   = document.querySelector('.identity__sticky');
-  const identityWords    = document.querySelectorAll('.identity__word');
+  const identityWordsEl  = document.querySelector('.identity__words');
+  const identityType     = document.querySelector('.identity__type');
   const identityMemories = document.querySelectorAll('.identity__memory');
   const identityBottom   = document.querySelector('.identity__bottomline');
   const identityCount    = document.querySelector('.identity__count');
 
-  let identityIdx = 0;
+  const identityWords = identityWordsEl
+    ? (identityWordsEl.dataset.words || '').split('|').map(s => s.trim()).filter(Boolean)
+    : [];
+
+  // Ritmo del typewriter
+  const TYPE_MIN  = 60;   // escribir: 60–140 ms por letra (irregular = más humano)
+  const TYPE_VAR  = 80;
+  const DELETE_MS = 38;   // borrar: parejo y un poco más rápido (como mantener backspace)
+  const HOLD_MS   = 1500; // pausa con la palabra completa
+  const GAP_MS    = 380;  // pausa con el campo vacío, antes de la próxima palabra
+
+  let identityIdx = 0;            // índice de la palabra actual
+  let identityChars = 0;          // letras visibles ahora mismo
+  let identityPhase = 'typing';   // 'typing' | 'holding' | 'deleting'
   let identityTimer = null;
-  const IDENTITY_INTERVAL = 2800; // ms per word (typewriter needs hold time)
+  let identityRunning = false;
 
-  // Split each word into per-letter spans for staggered reveal
-  function splitWordIntoChars(wordEl) {
-    const counter = { i: 0 };
-    function process(node) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const frag = document.createDocumentFragment();
-        for (const ch of node.textContent) {
-          const span = document.createElement('span');
-          span.className = 'char';
-          span.style.setProperty('--i', counter.i++);
-          span.textContent = ch === ' ' ? ' ' : ch;
-          frag.appendChild(span);
-        }
-        node.parentNode.replaceChild(frag, node);
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        Array.from(node.childNodes).forEach(process);
-      }
-    }
-    process(wordEl);
-  }
-  identityWords.forEach(splitWordIntoChars);
-
-  function setIdentity(idx) {
+  // La memoria (imagen) + contador acompañan a la palabra que empieza
+  function identitySetMeta(idx) {
     const n = identityWords.length;
-    identityWords.forEach((w, i) => {
-      w.classList.toggle('is-active', i === idx);
-      w.classList.toggle('is-past',   i <  idx);
-    });
-    identityMemories.forEach((m, i) => {
-      m.classList.toggle('is-active', i === idx);
-    });
+    identityMemories.forEach((m, i) => m.classList.toggle('is-active', i === idx));
     if (identityCount) {
       identityCount.textContent = String(idx + 1).padStart(2, '0') + ' / ' + String(n).padStart(2, '0');
     }
-    if (identityBottom) {
-      identityBottom.classList.add('show');
+    if (identityBottom) identityBottom.classList.add('show');
+  }
+
+  function identityRender() {
+    if (identityType) identityType.textContent = identityWords[identityIdx].slice(0, identityChars);
+  }
+
+  function identitySchedule(ms) { identityTimer = setTimeout(identityStep, ms); }
+
+  function identityStep() {
+    const word = identityWords[identityIdx];
+    if (identityPhase === 'typing') {
+      if (identityChars === 0) identitySetMeta(identityIdx); // la memoria aparece al iniciar la palabra
+      if (identityChars < word.length) {
+        identityWordsEl.classList.add('is-busy');             // cursor solido mientras escribe
+        identityChars++;
+        identityRender();
+        identitySchedule(TYPE_MIN + Math.random() * TYPE_VAR);
+      } else {
+        identityPhase = 'holding';
+        identityWordsEl.classList.remove('is-busy');          // cursor parpadea en la pausa
+        identitySchedule(HOLD_MS);
+      }
+    } else if (identityPhase === 'holding') {
+      identityPhase = 'deleting';
+      identitySchedule(0);
+    } else { // deleting
+      if (identityChars > 0) {
+        identityWordsEl.classList.add('is-busy');             // cursor solido mientras borra
+        identityChars--;
+        identityRender();
+        if (identityChars === 0) {
+          identityWordsEl.classList.remove('is-busy');        // parpadea en el hueco vacio
+          identitySchedule(GAP_MS);
+        } else {
+          identitySchedule(DELETE_MS);
+        }
+      } else {
+        identityIdx = (identityIdx + 1) % identityWords.length;
+        identityPhase = 'typing';
+        identitySchedule(0);
+      }
     }
   }
 
-  function tickIdentity() {
-    const n = identityWords.length;
-    identityIdx = (identityIdx + 1) % n;
-    setIdentity(identityIdx);
+  function identityStart() {
+    if (identityRunning || !identityWords.length) return;
+    identityRunning = true;
+    identityStep();
+  }
+  function identityStop() {
+    identityRunning = false;
+    if (identityTimer) { clearTimeout(identityTimer); identityTimer = null; }
+    if (identityWordsEl) identityWordsEl.classList.remove('is-busy');
   }
 
-  // Start cycling only when the section is visible (saves cycles + avoids ticking offscreen)
   if (identitySection && identityWords.length) {
-    // Wait two animation frames so the browser paints the initial char state
-    // (opacity 0) before we flip the active class — that way the transition fires.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (identitySticky) identitySticky.classList.add('is-ready');
-        // Con reduce-motion no auto-ciclamos: mostramos un estado final estatico ("Soy Johana.").
-        setIdentity(prefersReduced ? identityWords.length - 1 : 0);
+        if (prefersReduced) {
+          // Con reduce-motion: estado estatico "Soy Johana.", sin animacion.
+          identityIdx = identityWords.length - 1;
+          identityChars = identityWords[identityIdx].length;
+          identityRender();
+          identitySetMeta(identityIdx);
+        } else {
+          identityIdx = 0; identityChars = 0; identityPhase = 'typing';
+          identityRender();
+          identitySetMeta(0);
+        }
       });
     });
     if (!prefersReduced) {
+      // Arranca/para solo cuando la seccion esta a la vista (no malgasta ciclos fuera de pantalla)
       const visIO = new IntersectionObserver((entries) => {
         entries.forEach(e => {
-          if (e.isIntersecting) {
-            if (!identityTimer) identityTimer = setInterval(tickIdentity, IDENTITY_INTERVAL);
-          } else {
-            if (identityTimer) { clearInterval(identityTimer); identityTimer = null; }
-          }
+          if (e.isIntersecting) identityStart();
+          else identityStop();
         });
       }, { threshold: 0.3 });
       visIO.observe(identitySection);
@@ -198,11 +185,21 @@
       const total = reelEl.offsetHeight - viewport;
       let progress = (-rect.top) / total;
       progress = Math.max(0, Math.min(1, progress));
+      const inView = rect.bottom > 0 && rect.top < viewport;
 
       const n = slides.length;
       const idx = Math.min(n - 1, Math.floor(progress * n * 0.999));
 
-      slides.forEach((s, i) => s.classList.toggle('is-active', i === idx));
+      slides.forEach((s, i) => {
+        const active = i === idx;
+        s.classList.toggle('is-active', active);
+        // Background videos only run while their slide is visible (saves CPU/battery)
+        const v = s.querySelector('video');
+        if (v) {
+          if (active && inView) { if (v.paused) v.play().catch(() => {}); }
+          else if (!v.paused) { v.pause(); }
+        }
+      });
       panels.forEach((p, i) => {
         p.classList.toggle('is-active', i === idx);
         p.classList.toggle('is-past',   i <  idx);

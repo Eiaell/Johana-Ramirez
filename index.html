@@ -12,22 +12,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@200;300;400;500;600&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css?v=10" />
+  <link rel="stylesheet" href="css/style.css?v=11" />
   <link rel="icon" type="image/png" href="assets/logo.png" />
 </head>
 <body>
-
-  <!-- ============ LOADER ============ -->
-  <div class="loader" aria-hidden="true">
-    <video class="loader__video" autoplay muted loop playsinline preload="auto">
-      <source src="assets/video.mp4?v=4" type="video/mp4" />
-    </video>
-    <div class="loader__veil"></div>
-    <div class="loader__wrap">
-      <img class="loader__logo" src="assets/logo-mark.png" alt="Johana Ramirez — Eventos corporativos & personales" />
-      <div class="loader__bar"></div>
-    </div>
-  </div>
 
   <!-- ============ NAV ============ -->
   <nav class="nav">
@@ -105,16 +93,11 @@
       <div class="identity__count">01 / 08</div>
       <div class="identity__stack">
         <span class="identity__soy">Soy</span>
-        <span class="identity__words">
-          <span class="identity__word"><span class="it">mujer.</span></span>
-          <span class="identity__word"><span class="it">hija.</span></span>
-          <span class="identity__word"><span class="it">mamá.</span></span>
-          <span class="identity__word"><span class="it">amiga.</span></span>
-          <span class="identity__word"><span class="it">empresaria.</span></span>
-          <span class="identity__word"><span class="it">detallista.</span></span>
-          <span class="identity__word is-long"><span class="it">creadora de<br>momentos.</span></span>
-          <span class="identity__word"><span class="it">Johana.</span></span>
+        <span class="identity__words" data-words="mujer.|hija.|mamá.|amiga.|empresaria.|detallista.|creadora de momentos.|Johana.">
+          <span class="identity__ghost it" aria-hidden="true">creadora de<br>momentos.</span>
+          <span class="identity__type it" aria-hidden="true">Johana.</span>
         </span>
+        <span class="identity__sr">Soy mujer, hija, mamá, amiga, empresaria, detallista, creadora de momentos y Johana.</span>
       </div>
       <div class="identity__bottomline">Una historia que se cuenta en cada detalle</div>
     </div>
@@ -249,9 +232,14 @@
       <p class="body fade-up delay-2" style="margin: 0 auto;">Cumpleaños, baby showers, premios, fiestas íntimas. La misma producción a nivel de marca puesta al servicio de las historias más personales.</p>
     </div>
 
-    <div class="reel" data-reel="personal" style="height: 200vh;">
+    <div class="reel" data-reel="personal" style="height: 250vh;">
       <div class="reel__sticky">
         <div class="reel__media">
+          <div class="reel__slide">
+            <video class="reel__video" poster="assets/boda-poster.jpg?v=1" muted loop playsinline preload="metadata" aria-hidden="true">
+              <source src="assets/boda-loop.mp4?v=1" type="video/mp4" />
+            </video>
+          </div>
           <div class="reel__slide">
             <img src="assets/img/premio-influencer.png" alt="Premio Influencer 2026 — Rooftop sobre el malecón al atardecer" loading="lazy" />
           </div>
@@ -261,20 +249,26 @@
         </div>
         <div class="reel__text">
           <div class="reel__panel">
-            <span class="num">06 — Premiación íntima</span>
+            <span class="num">06 — Boda</span>
+            <h3>Una boda<br/><span class="italic">bajo mil luces.</span></h3>
+            <p class="body">Bajo una araña de cristal y un cielo de luces cálidas, una pista que no paró en toda la noche. Orquesta en vivo, primer baile y una entrada de novia de película: una boda producida hasta el último detalle.</p>
+            <div class="meta"><span>Boda</span><span>Casa de campo · Lima</span></div>
+          </div>
+          <div class="reel__panel">
+            <span class="num">07 — Premiación íntima</span>
             <h3>Premio Influencer<br/><span class="italic">con el mar de testigo.</span></h3>
             <p class="body">Un rooftop frente al océano, luces cálidas y un photocall que se volvió portada de redes. Una premiación que se sintió como una fiesta entre amigos.</p>
             <div class="meta"><span>Premiación</span><span>Rooftop · Lima</span></div>
           </div>
           <div class="reel__panel">
-            <span class="num">07 — Baby shower</span>
+            <span class="num">08 — Baby shower</span>
             <h3>Bienvenida en rosa<br/><span class="italic">al borde del acantilado.</span></h3>
             <p class="body">Globos pastel, letras gigantes, mesas redondas y luces colgantes con vista al Pacífico. Una tarde para celebrar la vida que viene en camino.</p>
             <div class="meta"><span>Baby Shower</span><span>Miraflores</span></div>
           </div>
         </div>
         <div class="reel__counter">
-          <span class="pip"></span><span class="pip"></span>
+          <span class="pip"></span><span class="pip"></span><span class="pip"></span>
         </div>
       </div>
     </div>
@@ -501,6 +495,6 @@
     </div>
   </footer>
 
-  <script src="js/app.js?v=8"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>
