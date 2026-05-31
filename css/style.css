@@ -305,15 +305,12 @@ p.body {
   height: 24px;
   width: auto;
   margin-right: clamp(58px, 6.5vw, 110px);
-  /* blanco + sombra suave: legible sobre el video, sin barra clara */
-  filter: brightness(0) invert(1) drop-shadow(0 1px 5px rgba(0, 0, 0, 0.55));
-  opacity: 0.72;
+  /* Los assets ya son BLANCOS (*-white) → sin filtro de inversión (robusto también
+     en iOS/Safari, donde el invert salía negro). Solo una sombra suave para legibilidad. */
+  filter: drop-shadow(0 1px 5px rgba(0, 0, 0, 0.55));
+  opacity: 0.88;
   transform-origin: center center;   /* el efecto lupa (JS) escala desde el centro */
   will-change: transform, opacity;
-}
-/* MINI: alas/disco ya vienen en blanco con "MINI" oscuro → NO blanquear, solo sombra */
-.herostrip__logo--mini {
-  filter: drop-shadow(0 1px 5px rgba(0, 0, 0, 0.55));
 }
 @media (max-width: 720px) {
   .herostrip { top: 40px; padding: 22px 0; }
