@@ -26,28 +26,31 @@
     requestAnimationFrame(() => requestAnimationFrame(revealHero));
   }
 
-  // ===== Hero video — reproducir solo cuando conviene =====
+  // ===== Hero video — reproducir (incluido móvil); solo poster en ahorro de datos / reduce-motion =====
   (function () {
     const heroVideo = document.querySelector('.hero__video');
     if (!heroVideo) return;
     const saveData = navigator.connection && navigator.connection.saveData;
-    const tooSmall = window.matchMedia('(max-width: 700px)').matches;
-    if (prefersReduced || saveData || tooSmall) {
-      // Mostrar solo el poster: no descargar ni reproducir el loop pesado.
+    if (prefersReduced || saveData) {
+      // Mostrar solo el poster: no descargar ni reproducir el loop.
       heroVideo.removeAttribute('autoplay');
       heroVideo.preload = 'none';
       try { heroVideo.pause(); } catch (e) {}
     } else {
+      heroVideo.preload = 'auto';     // que cargue también en móvil
       const tryPlay = () => heroVideo.play().catch(function () {});
       tryPlay();
       heroVideo.addEventListener('canplay', tryPlay, { once: true });
+      heroVideo.addEventListener('loadeddata', tryPlay, { once: true });
     }
   })();
 
   // ===== Línea de marcas — efecto lupa: crece en el centro, decrece hacia los lados =====
   (function () {
     const strip = document.querySelector('.herostrip');
-    if (!strip || prefersReduced) return;            // reduce-motion: escala uniforme (CSS)
+    // En móvil NO aplicamos la lupa: en pantalla angosta deja casi todos los logos
+    // diminutos/tenues. Quedan uniformes y visibles (escala/opacidad del CSS).
+    if (!strip || prefersReduced || window.innerWidth <= 700) return;
     const logos = Array.from(strip.querySelectorAll('.herostrip__logo'));
     if (!logos.length) return;
 
