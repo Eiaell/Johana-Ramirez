@@ -278,12 +278,14 @@ p.body {
 /* ---- Línea de marcas: marquee horizontal arriba del hero (logos en blanco SOBRE el video) ---- */
 .herostrip {
   position: absolute;
-  top: 80px;
+  top: 44px;
   left: 0;
   right: 0;
   z-index: 3;                 /* sobre el video; el título (centrado) no la toca */
   overflow: hidden;
   pointer-events: none;
+  /* alto generoso (padding): la lupa agranda los logos y NO deben recortarse arriba/abajo */
+  padding: 32px 0;
   /* sin fondo: los logos van directo sobre el video (el scrim del hero ya oscurece arriba) */
   -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
           mask-image: linear-gradient(90deg, transparent 0, #000 14%, #000 86%, transparent 100%);
@@ -302,7 +304,7 @@ p.body {
   flex: 0 0 auto;
   height: 24px;
   width: auto;
-  margin-right: clamp(44px, 5.5vw, 80px);
+  margin-right: clamp(58px, 6.5vw, 110px);
   /* blanco + sombra suave: legible sobre el video, sin barra clara */
   filter: brightness(0) invert(1) drop-shadow(0 1px 5px rgba(0, 0, 0, 0.55));
   opacity: 0.72;
@@ -314,8 +316,8 @@ p.body {
   filter: drop-shadow(0 1px 5px rgba(0, 0, 0, 0.55));
 }
 @media (max-width: 720px) {
-  .herostrip { top: 60px; }
-  .herostrip__logo { height: 17px; margin-right: 34px; }
+  .herostrip { top: 40px; padding: 22px 0; }
+  .herostrip__logo { height: 16px; margin-right: 42px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .herostrip__track { animation: none; }

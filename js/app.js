@@ -51,9 +51,9 @@
     const logos = Array.from(strip.querySelectorAll('.herostrip__logo'));
     if (!logos.length) return;
 
-    const MAX = 1.5;    // escala en el centro de la pantalla
-    const MIN = 0.68;   // escala en los extremos
-    const SIGMA = 0.24; // ancho del "lente" como fracción del viewport
+    const MAX = 1.8;    // escala en el centro de la pantalla
+    const MIN = 0.6;    // escala en los extremos
+    const SIGMA = 0.17; // ancho del "lente" como fracción del viewport (menor = más concentrado/notorio)
 
     let raf = null;
     function frame() {
