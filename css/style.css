@@ -229,6 +229,74 @@ p.body {
   opacity: 1; transform: translateY(0);
 }
 
+/* ---- Hero fork: elige tipo de evento ---- */
+.hero__fork {
+  margin-top: 40px;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 1s var(--ease-out) 1.2s, transform 1s var(--ease-out) 1.2s;
+}
+.hero.is-ready .hero__fork { opacity: 1; transform: translateY(0); }
+
+.forkbtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  flex: 0 0 340px;
+  width: 340px;
+  max-width: 42vw;
+  padding: 28px 34px;
+  text-align: left;
+  border: 1px solid rgba(216, 184, 120, 0.45);
+  border-radius: 16px;
+  background: rgba(15, 18, 32, 0.32);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: var(--cream);
+  transition: border-color .35s var(--ease-out), background .35s var(--ease-out), transform .35s var(--ease-out);
+}
+.forkbtn:hover {
+  border-color: var(--gold-soft);
+  background: rgba(15, 18, 32, 0.5);
+  transform: translateY(-3px);
+}
+.forkbtn__k {
+  font-family: var(--sans);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+.forkbtn__t {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 38px;
+  line-height: 1;
+  color: var(--cream);
+}
+.forkbtn__d {
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(245, 240, 230, 0.72);
+}
+
+@media (max-width: 700px) {
+  .hero__fork { flex-direction: column; gap: 12px; width: 100%; align-items: center; }
+  .forkbtn {
+    flex: none;
+    width: 100%;
+    max-width: 340px;
+    padding: 18px 24px;
+  }
+  .forkbtn__t { font-size: 30px; }
+}
+
 .hero__bg {
   position: absolute;
   inset: 0;
@@ -623,6 +691,188 @@ section.section.tight { padding-top: 60px; padding-bottom: 60px; }
   max-width: var(--maxw);
   margin: 0 auto;
 }
+
+/* Anchor offset para que el nav no tape el título al saltar */
+#corporativo, #privado { scroll-margin-top: 90px; }
+
+/* ---- Offerings: lo que ofrecemos por rama ---- */
+.offerings {
+  list-style: none;
+  margin: 44px auto 0;
+  padding: 0;
+  max-width: 880px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: rgba(27, 34, 56, 0.12);
+  border: 1px solid rgba(27, 34, 56, 0.12);
+  border-radius: 14px;
+  overflow: hidden;
+  text-align: left;
+}
+.offerings li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 26px 28px;
+  background: var(--cream, #faf6ee);
+}
+.offerings__t {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--navy);
+}
+.offerings__d {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.story.personal .offerings__t { color: var(--gold-deep); }
+
+/* Corporativo: fondo navy -> tarjetas glassy oscuras */
+.story.corporate .offerings {
+  background: rgba(216, 184, 120, 0.18);
+  border-color: rgba(216, 184, 120, 0.22);
+}
+.story.corporate .offerings li { background: rgba(255, 255, 255, 0.03); }
+.story.corporate .offerings__t { color: var(--gold-soft); }
+.story.corporate .offerings__d { color: rgba(250, 246, 238, 0.66); }
+
+@media (max-width: 720px) {
+  .offerings { grid-template-columns: 1fr; max-width: 460px; }
+}
+
+/* ============================================
+   BRANCHES — tarjetas de bifurcación (index)
+   ============================================ */
+.branches { background: var(--cream-2, #f3ece0); }
+.branches__inner {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+  padding: 0 var(--pad-x);
+}
+.branchcard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 320px;
+  padding: 44px 40px;
+  border-radius: 18px;
+  overflow: hidden;
+  transition: transform .4s var(--ease-out), box-shadow .4s var(--ease-out);
+}
+.branchcard:hover { transform: translateY(-4px); box-shadow: 0 24px 60px rgba(27, 34, 56, 0.18); }
+.branchcard--personal {
+  background: linear-gradient(160deg, var(--cream) 0%, var(--blush) 100%);
+  border: 1px solid rgba(27, 34, 56, 0.08);
+}
+.branchcard--corp {
+  background: linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 100%);
+  border: 1px solid rgba(216, 184, 120, 0.25);
+}
+.branchcard__k {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+.branchcard--corp .branchcard__k { color: var(--gold-soft); }
+.branchcard__t {
+  font-family: var(--serif);
+  font-size: clamp(28px, 3.4vw, 40px);
+  line-height: 1.04;
+  color: var(--navy);
+}
+.branchcard--corp .branchcard__t { color: var(--cream); }
+.branchcard__t .it { font-style: italic; color: var(--gold-deep); }
+.branchcard--corp .branchcard__t .it { color: var(--gold-soft); }
+.branchcard__d {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  max-width: 42ch;
+}
+.branchcard--corp .branchcard__d { color: rgba(250, 246, 238, 0.72); }
+.branchcard__go {
+  margin-top: auto;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  transition: letter-spacing .35s var(--ease-out);
+}
+.branchcard--corp .branchcard__go { color: var(--gold-soft); }
+.branchcard:hover .branchcard__go { letter-spacing: 0.2em; }
+
+@media (max-width: 760px) {
+  .branches__inner { grid-template-columns: 1fr; gap: 16px; }
+  .branchcard { min-height: 240px; padding: 34px 28px; }
+}
+
+/* ============================================
+   SUBPÁGINAS (privado.html / corporativo.html)
+   ============================================ */
+/* Nav sólido desde el inicio (no hay hero translúcido detrás) */
+body.subpage .nav {
+  background: rgba(250, 246, 238, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+/* La primera sección debe despejar el nav fijo */
+body.subpage .story { padding-top: 116px; }
+
+.backlink {
+  display: inline-block;
+  margin-bottom: 22px;
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  transition: opacity .3s var(--ease-out);
+}
+.story.corporate .backlink { color: var(--gold-soft); }
+.backlink:hover { opacity: 0.7; }
+
+/* Cross-link entre ramas */
+.crosslink { background: var(--cream-2, #f3ece0); }
+.crosslink__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 40px var(--pad-x);
+  text-align: center;
+}
+.crosslink__inner > span {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 22px;
+  color: var(--navy);
+}
+.crosslink__go {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  padding: 12px 22px;
+  transition: background .35s var(--ease-out), color .35s var(--ease-out);
+}
+.crosslink__go:hover { background: var(--gold); color: #fff; }
 
 .divider {
   width: 1px;
